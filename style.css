@@ -56,9 +56,7 @@ a:hover {
 /* ---------------- Header / Nav ---------------- */
 
 .site-header {
-  /* TEMP TEST: deliberately changed from var(--sap-blue-dark) to verify header-watch
-     CI detects this. Revert to `background: var(--sap-blue-dark);` after confirming. */
-  background: #c0392b;
+  background: var(--sap-blue-dark);
   color: #fff;
   position: sticky;
   top: 0;
