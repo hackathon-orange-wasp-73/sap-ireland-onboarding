@@ -68,7 +68,7 @@ python header_watch.py --model claude-haiku-4.5 --timeout 240
 
 | Flag | Default | Purpose |
 | --- | --- | --- |
-| `url` (positional, optional) | `https://legendary-tribble-ny53n3v.pages.github.io/` | The page to watch. |
+| `url` (positional, optional) | `https://hackathon-orange-wasp-73.github.io/sap-ireland-onboarding/` | The page to watch. |
 | `--model` | `claude-haiku-4.5` | A PNG-capable model that supports two-image comparison. |
 | `--list-models` | — | List compatible models without running the agent. |
 | `--output` | `.header-watch` | Local artifacts root. |
@@ -105,12 +105,12 @@ CLI access; `header_watch.py` passes it to `CopilotClient(github_token=...)`
 when present. Without this secret, the workflow will fail at the
 "Run header watch" step with an authentication error.
 
-### ⚠️ GitHub Pages visibility
+### ⚠️ GitHub Pages visibility (resolved)
 
-`https://legendary-tribble-ny53n3v.pages.github.io/` currently returns an
-HTTP **302 redirect to `github.com/pages/auth`** — the Pages site for this
-private repository requires GitHub authentication to view. Playwright (and
-this agent) cannot complete a GitHub sign-in flow, so **watcher runs against
-this URL will not succeed until the Pages site is made public, or the
-workflow is pointed at a URL that doesn't require auth.** This was not
-bypassed; flagging it back rather than working around it, per the request.
+The repository is private, but its GitHub Pages site now has its visibility
+set to **public** independently of the repo (`PUT /repos/{owner}/{repo}/pages
+{"public": true}`) — no repo code/history was exposed. Enabling that changed
+the site's URL from the private per-build subdomain
+(`legendary-tribble-ny53n3v.pages.github.io`, now 404) to the standard
+project-Pages URL: `https://hackathon-orange-wasp-73.github.io/sap-ireland-onboarding/`,
+which is what this tool now watches by default.

@@ -31,7 +31,7 @@ from header_watch_support import (
 
 # GitHub Pages site for the SAP Dublin onboarding project
 # (hackathon-orange-wasp-73/sap-ireland-onboarding, branch main).
-DEFAULT_URL = "https://legendary-tribble-ny53n3v.pages.github.io/"
+DEFAULT_URL = "https://hackathon-orange-wasp-73.github.io/sap-ireland-onboarding/"
 
 TASK = (
     "Check this URL's header/navigation bar for meaningful changes since the previous run. "
