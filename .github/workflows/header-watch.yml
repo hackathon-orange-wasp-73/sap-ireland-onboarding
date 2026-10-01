@@ -4,6 +4,10 @@ on:
   schedule:
     # Daily at 06:00 UTC.
     - cron: "0 6 * * *"
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       url:
@@ -15,6 +19,12 @@ on:
         required: false
         default: "claude-haiku-4.5"
 
+# Design choice: on push/pull_request we run immediately against the current live
+# Pages URL rather than polling for the new Pages deployment to finish. GitHub Pages
+# builds are typically done within well under a minute, so a push-triggered run here
+# mostly still observes the deployment that resulted from this same push; any residual
+# race is caught by the next scheduled/manual run. This avoids added complexity (e.g.
+# polling the Pages deployments API) for a low-stakes header/nav check.
 jobs:
   header-watch:
     runs-on: ubuntu-latest
