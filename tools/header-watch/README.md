@@ -96,21 +96,38 @@ Runs daily (06:00 UTC) and on-demand via `workflow_dispatch` (with optional
    change, without needing issue-tracking logic in the workflow itself. Open
    the run's artifact to read `report.md` for what changed.
 
-### Required secret
+### Required secret: `COPILOT_SDK_TOKEN`
 
 The workflow needs an authenticated Copilot SDK session, which cannot use
-interactive device-code login in CI. Set a repository secret
-**`COPILOT_SDK_TOKEN`** to a GitHub PAT belonging to an account with Copilot
-CLI access; `header_watch.py` passes it to `CopilotClient(github_token=...)`
-when present. Without this secret, the workflow will fail at the
-"Run header watch" step with an authentication error.
+interactive device-code login in CI. The workflow already references
+`secrets.COPILOT_SDK_TOKEN` as a placeholder — it just needs the secret's
+**value** provisioned once:
 
-### ⚠️ GitHub Pages visibility (resolved)
+1. Pick (or create) a GitHub account that has GitHub Copilot access enabled
+   (an individual Copilot subscription, or org/enterprise-assigned seat) and
+   that can run the Copilot CLI (`copilot login --device-code` succeeds for
+   that account locally).
+2. Create a **fine-grained personal access token** for that account:
+   [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new).
+   No special repository permissions are required beyond the defaults — this
+   token is only used to authenticate the Copilot SDK/CLI session, not to
+   access repository contents. Give it a descriptive name (e.g.
+   `header-watch-copilot-sdk`) and a reasonable expiry, then rotate it before
+   it expires.
+3. In this repository, go to **Settings → Secrets and variables → Actions →
+   New repository secret**, name it `COPILOT_SDK_TOKEN`, and paste the PAT
+   value.
+4. Re-run the workflow (`Actions → Header watch → Run workflow`) to confirm
+   authentication succeeds.
 
-The repository is private, but its GitHub Pages site now has its visibility
-set to **public** independently of the repo (`PUT /repos/{owner}/{repo}/pages
-{"public": true}`) — no repo code/history was exposed. Enabling that changed
-the site's URL from the private per-build subdomain
-(`legendary-tribble-ny53n3v.pages.github.io`, now 404) to the standard
+Without this secret, the workflow fails at the "Run header watch" step with
+an authentication error — everything else (Node/Python/Chromium install,
+artifact upload) runs independently of it.
+
+### GitHub Pages visibility
+
+The repository is public, and its GitHub Pages site is served at the standard
 project-Pages URL: `https://hackathon-orange-wasp-73.github.io/sap-ireland-onboarding/`,
-which is what this tool now watches by default.
+which is what this tool watches by default. (An earlier private-repo state
+served the site from a different, auth-gated subdomain
+(`legendary-tribble-ny53n3v.pages.github.io`); that URL now 404s.)
