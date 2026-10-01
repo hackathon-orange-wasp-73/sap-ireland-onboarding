@@ -60,6 +60,19 @@ jobs:
       - name: Pre-stage the Copilot SDK runtime
         run: python -m copilot download-runtime
 
+      # Persist header-watch's run history (latest.json + before/after screenshots)
+      # across CI runs so each run compares against the previous one's screenshot,
+      # same as local runs do. Key is per-run-id so the cache is always re-saved
+      # (actions/cache skips saving on an exact key hit); restore-keys falls back to
+      # the most recent cache with this prefix, i.e. the previous run's state.
+      - name: Restore/persist header-watch run history
+        uses: actions/cache@v4
+        with:
+          path: tools/header-watch/.header-watch
+          key: header-watch-state-${{ github.run_id }}
+          restore-keys: |
+            header-watch-state-
+
       - name: Run header watch
         id: watch
         env:
