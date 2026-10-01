@@ -1,0 +1,84 @@
+name: Header watch
+
+on:
+  schedule:
+    # Daily at 06:00 UTC.
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "URL to watch (defaults to the onboarding site's GitHub Pages URL)"
+        required: false
+        default: ""
+      model:
+        description: "Copilot model to use"
+        required: false
+        default: "claude-haiku-4.5"
+
+jobs:
+  header-watch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: tools/header-watch
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # No package-lock.json is committed (see README), so install rather than `npm ci`.
+      - name: Install Node dependencies
+        run: npm install
+
+      - name: Install Playwright's Chromium browser
+        run: npm run browser:install
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Pre-stage the Copilot SDK runtime
+        run: python -m copilot download-runtime
+
+      - name: Run header watch
+        id: watch
+        env:
+          COPILOT_SDK_TOKEN: ${{ secrets.COPILOT_SDK_TOKEN }}
+        run: |
+          set -o pipefail
+          URL="${{ github.event.inputs.url }}"
+          MODEL="${{ github.event.inputs.model }}"
+          ARGS=()
+          if [ -n "$URL" ]; then ARGS+=("$URL"); fi
+          if [ -n "$MODEL" ]; then ARGS+=(--model "$MODEL"); fi
+          python header_watch.py "${ARGS[@]}" --output .header-watch --timeout 300 | tee run.log
+          ARTIFACT_DIR=$(grep '^Artifacts:' run.log | sed 's/^Artifacts: //')
+          echo "artifact_dir=$ARTIFACT_DIR" >> "$GITHUB_OUTPUT"
+          STATUS=$(python -c "import json; print(json.load(open('$ARTIFACT_DIR/outcome.json'))['status'])")
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+
+      - name: Upload run artifacts
+        if: always() && steps.watch.outputs.artifact_dir != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: header-watch-run-${{ github.run_id }}
+          # artifact_dir is already an absolute path printed by header_watch.py.
+          path: ${{ steps.watch.outputs.artifact_dir }}
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Fail if the header changed
+        if: steps.watch.outputs.status == 'changed'
+        run: |
+          echo "::error::Header/nav changed since the previous run. See the uploaded report.md artifact."
+          exit 1
