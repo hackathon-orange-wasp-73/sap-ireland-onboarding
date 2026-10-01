@@ -74,6 +74,25 @@ python header_watch.py --model claude-haiku-4.5 --timeout 240
 | `--output` | `.header-watch` | Local artifacts root. |
 | `--timeout` | `180` | Overall run limit in seconds. |
 
+### Running against a local demo instead of the public Pages URL
+
+The repo root has its own `package.json` with a `demo` script (matching the
+[workshop's](https://github.com/jeffrey-groneberg/ghcp-sdk-workshop) pattern)
+that serves the site's static files on a fixed local port:
+
+```bash
+# Terminal 1, from the repo root:
+npm run demo
+# -> serves http://127.0.0.1:8000/ (Python's http.server, bound to 127.0.0.1)
+
+# Terminal 2, from tools/header-watch/:
+python header_watch.py http://127.0.0.1:8000/
+```
+
+This lets you iterate on header/nav markup locally and re-run the watcher
+without waiting on a Pages deploy, and without depending on the public URL
+being reachable. Stop the server with Ctrl-C in terminal 1 when done.
+
 Run the same command again to compare against the previous run; each
 successful run becomes the next baseline.
 
