@@ -1,0 +1,7 @@
+.venv/
+.venv_check/
+node_modules/
+.header-watch/
+*.log
+__pycache__/
+*.pyc

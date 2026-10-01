@@ -1,0 +1,16 @@
+{
+  "name": "header-watch",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Autonomous header/nav watcher for the SAP Dublin onboarding site, built with the GitHub Copilot SDK",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "browser:install": "playwright install --with-deps chromium"
+  },
+  "dependencies": {
+    "@github/copilot": "1.0.83",
+    "@playwright/mcp": "0.0.81"
+  }
+}
